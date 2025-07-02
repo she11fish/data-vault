@@ -40,6 +40,10 @@ jobs:
         working-directory: ./frontend
         run: pnpm exec playwright install --with-deps
 
+      - name: Disable Next.js telemetry
+        working-directory: ./frontend
+        run: npx next telemetry disable
+
       - name: Build Next.js app
         working-directory: ./frontend
         run: pnpm build

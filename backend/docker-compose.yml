@@ -1,5 +1,6 @@
 services:
   server:
+    image: ghcr.io/she11fish/data-vault-api:latest
     build:
       context: .
       dockerfile: Dockerfile
