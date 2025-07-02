@@ -8,9 +8,11 @@ export default defineConfig({
   workers: process.env.CI ? 1 : undefined,
   reporter: 'html',
   use: {
+    headless: true,
     baseURL: process.env.NEXT_PUBLIC_SITE_URL || 'http://localhost:3000',
     trace: 'on-first-retry',
-    video: 'on-first-retry',
+    screenshot: 'only-on-failure',
+    video: 'retain-on-failure'
   },
 
   projects: [
