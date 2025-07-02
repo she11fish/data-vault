@@ -7,11 +7,10 @@ from app.utils.utils import generate_uuid
 
 class Token(Base):
     __tablename__ = "token"
-    # TODO: HANGE it to psql since this supports psql only 
-    # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
     id = Column(String, primary_key=True, default=generate_uuid)
     hashed_token = Column(String, index=True)
-    # user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    user_id = Column(String, ForeignKey("users.id"))
+    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    # user_id = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime, server_default=func.now())
     user = relationship("User", back_populates="token")

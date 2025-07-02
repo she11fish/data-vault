@@ -11,3 +11,4 @@ python-multipart
 fpdf2
 yagmail
 email-validator
+psycopg2-binary

@@ -49,7 +49,6 @@ jobs:
           DATABASE_URL: ${{ secrets.DATABASE_URL }}
           ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
-          echo "Starting backend container..."
           docker run -d --name backend_test -p 8000:8000 \
             -e SECRET_KEY=${SECRET_KEY} \
             -e ALGORITHM=${ALGORITHM} \
@@ -57,31 +56,11 @@ jobs:
             -e DATABASE_URL=${DATABASE_URL} \
             -e ALLOWED_ORIGINS=${ALLOWED_ORIGINS} \
             ghcr.io/${{ github.repository_owner }}/data-vault-api:latest
-
-          echo "Waiting for backend to start..."
-          sleep 5
+          sleep 15
           docker ps
           docker logs backend_test
-
-          for i in {1..6}; do
-            echo "Attempt $i: Checking if backend is up..."
-            if curl --fail http://localhost:8000/docs; then
-              echo "✅ Backend is responding!"
-              docker rm -f backend_test
-              exit 0
-            fi
-            echo "Backend not ready, waiting..."
-            docker logs backend_test
-            sleep 5
-          done
-
-          echo "❌ Backend failed to respond after 30 seconds"
-          echo "Final container status:"
-          docker ps -a
-          echo "Final logs:"
-          docker logs backend_test
+          curl --fail http://localhost:8000/docs || curl --fail http://localhost:8000
           docker rm -f backend_test
-          exit 1
 
       - name: Build and push backend image
         if: success()
