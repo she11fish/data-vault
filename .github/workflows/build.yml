@@ -42,14 +42,20 @@ jobs:
           cache-to: type=gha,mode=max
 
       - name: Smoke test backend image
+        env:
+          SECRET_KEY: ${{ secrets.SECRET_KEY }}
+          ALGORITHM: ${{ secrets.ALGORITHM }}
+          ACCESS_TOKEN_EXPIRE_MINUTES: ${{ secrets.ACCESS_TOKEN_EXPIRE_MINUTES }}
+          DATABASE_URL: ${{ secrets.DATABASE_URL }}
+          ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
         run: |
           docker run -d --name backend_test -p 8000:8000 \
-            -e SECRET_KEY=testsecret \
-            -e ALGORITHM=HS256 \
-            -e ACCESS_TOKEN_EXPIRE_MINUTES=30 \
-            -e DATABASE_URL=sqlite:///./test.db \
-            -e ALLOWED_ORIGINS=* \
-            ghcr.io/${{ github.repository_owner }}/data-vault-api:latest          
+            -e SECRET_KEY=${SECRET_KEY} \
+            -e ALGORITHM=${ALGORITHM} \
+            -e ACCESS_TOKEN_EXPIRE_MINUTES=${ACCESS_TOKEN_EXPIRE_MINUTES} \
+            -e DATABASE_URL=${DATABASE_URL} \
+            -e ALLOWED_ORIGINS=${ALLOWED_ORIGINS} \
+            ghcr.io/${{ github.repository_owner }}/data-vault-api:latest
           sleep 15
           curl --fail http://localhost:8000/docs || curl --fail http://localhost:8000
           docker rm -f backend_test
