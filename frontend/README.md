@@ -39,8 +39,8 @@ frontend/
 
 2. Set up environment variables:
    ```bash
-   cp .env.example .env.local
-   # Edit .env.local with your configuration
+   cp .env.example .env
+   # Edit .env with your configuration
    ```
 
 3. Run the development server:
