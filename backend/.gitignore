@@ -38,8 +38,7 @@ ENV/
 logs/
 
 # Local development
-.env
-.env.*
+.env*
 !.env.example
 
 # Test coverage
