@@ -14,7 +14,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog"
-import { Database, Plus, Trash2, FileText, LogOut } from "lucide-react"
+import { Database, Plus, Trash2, LogOut, Download, Eye } from "lucide-react"
 import Link from "next/link"
 import { useState, useEffect } from "react"
 import { useRouter } from "next/navigation"
@@ -34,6 +34,9 @@ export default function DashboardPage() {
   const [newItemContent, setNewItemContent] = useState("")
   const [isCreating, setIsCreating] = useState(false)
   const router = useRouter()
+  const [pdfUrl, setPdfUrl] = useState<string | null>(null)
+  const [isPdfDialogOpen, setIsPdfDialogOpen] = useState(false)
+  const [currentPdfName, setCurrentPdfName] = useState("")
 
   const getAuthHeaders = () => {
     const token = localStorage.getItem("token")
@@ -109,15 +112,31 @@ export default function DashboardPage() {
     }
   }
 
-  const convertToPdf = async (id: string) => {
+  const convertToPdf = async (id: string, name: string, action: "view" | "download" = "view") => {
     try {
       const response = await fetch(`/api/data/convert/${id}`, {
         headers: getAuthHeaders(),
       })
 
       if (response.ok) {
-        // Handle PDF download or display
-        alert("PDF conversion initiated")
+        const blob = await response.blob()
+        const url = URL.createObjectURL(blob)
+
+        if (action === "download") {
+          // Create download link
+          const a = document.createElement("a")
+          a.href = url
+          a.download = `${name}.pdf`
+          document.body.appendChild(a)
+          a.click()
+          document.body.removeChild(a)
+          URL.revokeObjectURL(url)
+        } else {
+          // View PDF in dialog
+          setPdfUrl(url)
+          setCurrentPdfName(name)
+          setIsPdfDialogOpen(true)
+        }
       } else {
         setError("Failed to convert to PDF")
       }
@@ -134,6 +153,15 @@ export default function DashboardPage() {
   useEffect(() => {
     fetchData()
   }, [])
+
+  const closePdfDialog = () => {
+    if (pdfUrl) {
+      URL.revokeObjectURL(pdfUrl)
+      setPdfUrl(null)
+    }
+    setIsPdfDialogOpen(false)
+    setCurrentPdfName("")
+  }
 
   if (isLoading) {
     return (
@@ -240,10 +268,23 @@ export default function DashboardPage() {
                   <CardTitle className="flex items-center justify-between">
                     <span className="truncate">{item.name}</span>
                     <div className="flex gap-2">
-                      <Button variant="outline" size="sm" onClick={() => convertToPdf(item.id)}>
-                        <FileText className="h-4 w-4" />
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => convertToPdf(item.id, item.name, "view")}
+                        title="View PDF"
+                      >
+                        <Eye className="h-4 w-4" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => deleteData(item.id)}>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => convertToPdf(item.id, item.name, "download")}
+                        title="Download PDF"
+                      >
+                        <Download className="h-4 w-4" />
+                      </Button>
+                      <Button variant="outline" size="sm" onClick={() => deleteData(item.id)} title="Delete">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -257,6 +298,39 @@ export default function DashboardPage() {
             ))}
           </div>
         )}
+        {/* PDF Viewer Dialog */}
+        <Dialog open={isPdfDialogOpen} onOpenChange={closePdfDialog}>
+          <DialogContent className="max-w-4xl max-h-[90vh] p-0">
+            <DialogHeader className="p-6 pb-2">
+              <DialogTitle className="flex items-center justify-between">
+                <span>PDF Preview: {currentPdfName}</span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() =>
+                    convertToPdf(
+                      data.find((item) => item.name === currentPdfName)?.id || "",
+                      currentPdfName,
+                      "download",
+                    )
+                  }
+                >
+                  <Download className="h-4 w-4 mr-2" />
+                  Download
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="px-6 pb-6">
+              {pdfUrl && (
+                <iframe
+                  src={pdfUrl}
+                  className="w-full h-[70vh] border rounded-md"
+                  title={`PDF Preview: ${currentPdfName}`}
+                />
+              )}
+            </div>
+          </DialogContent>
+        </Dialog>
       </main>
     </div>
   )
