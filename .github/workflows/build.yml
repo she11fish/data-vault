@@ -43,7 +43,13 @@ jobs:
 
       - name: Smoke test backend image
         run: |
-          docker run -d --name backend_test -p 8000:8000 ghcr.io/${{ github.repository_owner }}/data-vault-api:latest
+          docker run -d --name backend_test -p 8000:8000 \
+            -e SECRET_KEY=testsecret \
+            -e ALGORITHM=HS256 \
+            -e ACCESS_TOKEN_EXPIRE_MINUTES=30 \
+            -e DATABASE_URL=sqlite:///./test.db \
+            -e ALLOWED_ORIGINS=* \
+            ghcr.io/${{ github.repository_owner }}/data-vault-api:latest          
           sleep 15
           curl --fail http://localhost:8000/docs || curl --fail http://localhost:8000
           docker rm -f backend_test
