@@ -8,11 +8,11 @@ from app.utils.utils import generate_uuid
 
 class Data(Base):
     __tablename__ = "data" 
-    id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
-    # id = Column(String, primary_key=True, default=generate_uuid)
+    # id = Column(UUID(as_uuid=True), primary_key=True, default=uuid.uuid4)
+    id = Column(String, primary_key=True, default=generate_uuid)
     name = Column(String, index=True)
     content = Column(String, index=True)
-    user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
-    # user_id = Column(String, ForeignKey("users.id"))
+    # user_id = Column(UUID(as_uuid=True), ForeignKey("users.id"))
+    user_id = Column(String, ForeignKey("users.id"))
     created_at = Column(DateTime, default=datetime.now)
     user = relationship("User", back_populates="data")
