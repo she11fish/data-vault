@@ -1,0 +1,10 @@
+services:
+  server:
+    image: ghcr.io/she11fish/data-vault-api:latest
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "8000:8000"
+    env_file:
+      - .env

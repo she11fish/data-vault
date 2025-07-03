@@ -1,0 +1,14 @@
+pytesseract
+reportlab
+uvicorn
+fastapi
+pymongo
+python-dotenv
+passlib
+python-jose[cryptography]
+SQLAlchemy
+python-multipart
+fpdf2
+yagmail
+email-validator
+psycopg2-binary
